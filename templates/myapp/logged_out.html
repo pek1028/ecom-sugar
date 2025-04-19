@@ -1,0 +1,12 @@
+<!-- templates/myapp/registration/logged_out.html -->
+{% extends 'myapp/base.html' %}
+
+{% block title %}已登出{% endblock %}
+
+{% block content %}
+    <section class="form-section">
+        <h3>您已成功登出</h3>
+        <p class="message">感謝使用！</p>
+        <a href="{% url 'home' %}" class="btn btn-back">返回首頁</a>
+    </section>
+{% endblock %}

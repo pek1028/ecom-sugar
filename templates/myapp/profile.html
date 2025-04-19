@@ -1,0 +1,40 @@
+{% extends 'myapp/base.html' %}
+
+{% block title %}修改個人資料{% endblock %}
+
+{% block content %}
+<section class="form-section">
+    <h2>修改個人資料</h2>
+    {% if form.errors %}
+        <p class="message">請修正以下錯誤：</p>
+        <ul>
+            {% for field, errors in form.errors.items %}
+                {% for error in errors %}
+                    <li>{{ field }}: {{ error }}</li>
+                {% endfor %}
+            {% endfor %}
+        </ul>
+    {% endif %}
+    <form method="POST" class="form">
+        {% csrf_token %}
+        <label for="name">姓名</label>
+        <input type="text" id="name" name="name" value="{{ form.name.value|default:'' }}" required placeholder="輸入姓名">
+
+        <label for="phone">電話號碼</label>
+        <input type="text" id="phone" name="phone" value="{{ form.phone.value|default:'' }}" required placeholder="輸入電話號碼">
+
+        <label for="email">電子郵件</label>
+        <input type="email" id="email" name="email" value="{{ form.email.value|default:'' }}" required placeholder="輸入電子郵件">
+
+        <label for="address">地址</label>
+        <textarea id="address" name="address" placeholder="輸入地址">{{ form.address.value|default:'' }}</textarea>
+
+        <label for="line_id">Line ID</label>
+        <input type="text" id="line_id" name="line_id" value="{{ form.line_id.value|default:'' }}" placeholder="輸入Line ID">
+
+        <label for="birthdate">生日</label>
+        <input type="date" id="birthdate" name="birthdate" value="{{ form.birthdate.value|default:'' }}" required>
+        <button type="submit" class="btn btn-submit">儲存變更</button>
+    </form>
+</section>
+{% endblock %}

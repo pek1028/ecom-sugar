@@ -1,0 +1,144 @@
+{% extends 'myapp/base.html' %}
+{% load static %}
+
+{% block title %}購物車 - Sugar{% endblock %}
+
+{% block content %}
+<section class="form-section">
+    <h2>您的購物車</h2>
+    {% if cart_items %}
+        <table class="cart-table">
+            <thead>
+                <tr>
+                    <th>產品</th>
+                    <th>價格</th>
+                    <th>數量</th>
+                    <th>小計</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in cart_items %}
+                    <tr data-product-id="{{ item.product.id }}">
+                        <td>{{ item.product.name }}</td>
+                        <td>NT${{ item.product.price }}</td>
+                        <td>
+                            <form method="post" class="add-to-cart-form quantity-form">
+                                {% csrf_token %}
+                                <input type="hidden" name="product_id" value="{{ item.product.id }}">
+                                <input type="number" name="quantity" value="{{ item.quantity }}" min="0" max="{{ item.product.quantity }}" class="quantity-input">
+                            </form>
+                        </td>
+                        <td class="subtotal">NT${{ item.subtotal }}</td>
+                        <td>
+                            <form method="post" class="add-to-cart-form remove-form">
+                                {% csrf_token %}
+                                <input type="hidden" name="product_id" value="{{ item.product.id }}">
+                                <button type="submit" name="remove" class="btn btn-delete">移除</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <p><strong>總計：<span id="total-price">NT${{ total_price }}</span></strong></p>
+        <div class="button-group">
+            <a href="{% url 'home' %}" class="btn btn-back">繼續購物</a>
+            <a href="{% url 'checkout' %}" class="btn btn-checkout">結帳</a>
+        </div>
+    {% else %}
+        <p class="message">您的購物車目前是空的。</p>
+        <a href="{% url 'home' %}" class="btn btn-back">返回首頁</a>
+    {% endif %}
+</section>
+
+{% if cart_items %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const quantityInputs = document.querySelectorAll('.quantity-input');
+    const cartLink = document.querySelector('.cart-link');
+    const totalPriceElement = document.getElementById('total-price');
+
+    quantityInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            const form = this.closest('.quantity-form');
+            const productId = form.querySelector('input[name="product_id"]').value;
+            const quantity = this.value;
+            const row = this.closest('tr');
+            const price = parseInt(row.querySelector('td:nth-child(2)').textContent.replace('NT$', ''));
+
+            // Send AJAX request
+            fetch("{% url 'cart_view' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+                body: new URLSearchParams({
+                    'product_id': productId,
+                    'quantity': quantity,
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update subtotal in real-time
+                    const subtotal = price * quantity;
+                    row.querySelector('.subtotal').textContent = `NT$${subtotal}`;
+                    
+                    // Update total price and cart count
+                    totalPriceElement.textContent = `NT$${data.total_price}`;
+                    cartLink.setAttribute('data-count', data.cart_item_count);
+                    cartLink.textContent = `購物車 (${data.cart_item_count})`;
+
+                    // Remove row if quantity is 0
+                    if (quantity <= 0) {
+                        row.remove();
+                        if (document.querySelectorAll('.cart-table tr').length === 1) {
+                            location.reload(); // Reload if cart is empty
+                        }
+                    }
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    });
+
+    // Handle remove buttons
+    document.querySelectorAll('.remove-form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const productId = this.querySelector('input[name="product_id"]').value;
+
+            fetch("{% url 'cart_view' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+                body: new URLSearchParams({
+                    'product_id': productId,
+                    'remove': 'true',
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    form.closest('tr').remove();
+                    totalPriceElement.textContent = `NT$${data.total_price}`;
+                    cartLink.setAttribute('data-count', data.cart_item_count);
+                    cartLink.textContent = `購物車 (${data.cart_item_count})`;
+                    if (data.cart_item_count === 0) {
+                        location.reload(); // Reload if cart is empty
+                    }
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    });
+});
+</script>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,192 @@
+{% extends 'myapp/base.html' %}
+{% load static %}
+
+{% block title %}{{ product.name }} - Sugar{% endblock %}
+
+{% block content %}
+<section class="product-detail-section">
+    <div class="product-detail-container">
+        <!-- Left Side: Image Carousel with Thumbnails -->
+        <div class="product-image-section">
+            <div class="main-image-wrapper">
+                <div class="main-image-container">
+                    {% if product.images.all %}
+                        {% for image in product.images.all %}
+                            <img src="{{ image.image.url }}" alt="{{ product.name }}" class="main-image" data-index="{{ forloop.counter0 }}" style="display: {% if forloop.first %}block{% else %}none{% endif %};">
+                        {% endfor %}
+                    {% else %}
+                        <div class="no-images">
+                            <p>無圖片可用</p>
+                            <img src="{% static 'images/placeholder.png' %}" alt="無圖片" class="main-image" data-index="0">
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="thumbnail-carousel">
+                <button class="thumbnail-prev"><</button>
+                <div class="thumbnail-wrapper">
+                    <div class="thumbnail-container">
+                        {% if product.images.all %}
+                            {% for image in product.images.all %}
+                                <img src="{{ image.image.url }}" alt="{{ product.name }} thumbnail" class="thumbnail-image" data-index="{{ forloop.counter0 }}" style="opacity: {% if forloop.first %}1{% else %}0.5{% endif %};">
+                            {% endfor %}
+                        {% else %}
+                            <img src="{% static 'images/placeholder.png' %}" alt="無圖片" class="thumbnail-image" data-index="0" style="opacity: 1;">
+                        {% endif %}
+                    </div>
+                </div>
+                <button class="thumbnail-next">></button>
+            </div>
+        </div>
+
+        <!-- Right Side: Product Info and Actions -->
+        <div class="product-info-section">
+            <h2 class="product-title">{{ product.name }}</h2>
+            <div class="info-card">
+                <div class="info-item">
+                    <span class="info-label">價格：</span>
+                    <span class="info-value">NT${{ product.price }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">庫存數量：</span>
+                    <span class="info-value">{{ product.quantity }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">類別：</span>
+                    <span class="info-value">{{ product.category.name|default:"無" }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">尺寸：</span>
+                    <span class="info-value">{{ product.size|default:"未指定" }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">顏色：</span>
+                    <span class="info-value">{{ product.color|default:"未指定" }}</span>
+                </div>
+                <div class="info-item description">
+                    <span class="info-label">描述：</span>
+                    <p class="info-value">{{ product.description|default:"無描述" }}</p>
+                </div>
+            </div>
+            <div class="action-wrapper">
+                <form action="{% url 'add_to_cart' product.id %}" method="POST" class="add-to-cart-form">
+                    {% csrf_token %}
+                    <div class="quantity-wrapper">
+                        <label for="quantity">數量：</label>
+                        <button type="button" class="quantity-btn quantity-decrease">-</button>
+                        <input type="number" id="quantity" name="quantity" value="1" min="1" max="{{ product.quantity }}" required readonly>
+                        <button type="button" class="quantity-btn quantity-increase">+</button>
+                    </div>
+                    <button type="submit" class="btn btn-add-to-cart">加入購物車</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(() => {
+        // Main Image Carousel
+        const mainImages = document.querySelectorAll('.main-image');
+        const thumbnails = document.querySelectorAll('.thumbnail-image');
+        let currentIndex = 0;
+        const totalImages = mainImages.length;
+
+        if (totalImages === 0) {
+            console.error("No images found in carousel.");
+            return;
+        }
+
+        function updateMainImage(index) {
+            mainImages.forEach((img, i) => {
+                img.style.display = i === index ? 'block' : 'none';
+            });
+            thumbnails.forEach((thumb, i) => {
+                thumb.style.opacity = i === index ? '1' : '0.5';
+            });
+            currentIndex = index;
+        }
+
+        // Thumbnail Click
+        thumbnails.forEach((thumb) => {
+            thumb.addEventListener('click', () => {
+                const index = parseInt(thumb.getAttribute('data-index'));
+                updateMainImage(index);
+            });
+        });
+
+        // Thumbnail Carousel Navigation
+        const thumbnailPrev = document.querySelector('.thumbnail-prev');
+        const thumbnailNext = document.querySelector('.thumbnail-next');
+        const thumbnailContainer = document.querySelector('.thumbnail-container');
+        const thumbnailWrapper = document.querySelector('.thumbnail-wrapper');
+        const thumbnailsArray = Array.from(thumbnails);
+
+        // Calculate dimensions after ensuring elements are available
+        const thumbnailWidth = thumbnailsArray[0]?.offsetWidth + 10 || 90; // Including gap, default to 90 if undefined
+        const wrapperWidth = thumbnailWrapper?.offsetWidth || 0;
+        const visibleThumbnails = wrapperWidth > 0 ? Math.floor(wrapperWidth / thumbnailWidth) : 3; // Lowered to 3 to ensure buttons show with 4 thumbnails
+        let thumbnailPosition = 0;
+
+        console.log("Thumbnail Width:", thumbnailWidth);
+        console.log("Wrapper Width:", wrapperWidth);
+        console.log("Visible Thumbnails:", visibleThumbnails);
+        console.log("Total Thumbnails:", thumbnailsArray.length);
+
+        // Show buttons if there are more thumbnails than can fit in the visible area
+        if (thumbnailsArray.length <= visibleThumbnails) {
+            thumbnailPrev.style.display = 'none';
+            thumbnailNext.style.display = 'none';
+            console.log("Hiding navigation buttons: Total thumbnails <= Visible thumbnails");
+        } else {
+            thumbnailPrev.style.display = 'block';
+            thumbnailNext.style.display = 'block';
+            console.log("Showing navigation buttons: Total thumbnails > Visible thumbnails");
+
+            const maxPosition = (thumbnailsArray.length - visibleThumbnails) * thumbnailWidth;
+
+            thumbnailNext.addEventListener('click', () => {
+                if (Math.abs(thumbnailPosition) < maxPosition) {
+                    thumbnailPosition -= thumbnailWidth;
+                    thumbnailContainer.style.transform = `translateX(${thumbnailPosition}px)`;
+                    console.log("Next Click - New Position:", thumbnailPosition);
+                    console.log("Max Position:", maxPosition);
+                }
+            });
+
+            thumbnailPrev.addEventListener('click', () => {
+                if (thumbnailPosition < 0) {
+                    thumbnailPosition += thumbnailWidth;
+                    thumbnailContainer.style.transform = `translateX(${thumbnailPosition}px)`;
+                    console.log("Prev Click - New Position:", thumbnailPosition);
+                }
+            });
+        }
+
+        // Quantity Buttons
+        const quantityInput = document.querySelector('#quantity');
+        const decreaseBtn = document.querySelector('.quantity-decrease');
+        const increaseBtn = document.querySelector('.quantity-increase');
+        const maxQuantity = parseInt(quantityInput.getAttribute('max'));
+
+        decreaseBtn.addEventListener('click', () => {
+            let value = parseInt(quantityInput.value);
+            if (value > 1) {
+                quantityInput.value = value - 1;
+            }
+        });
+
+        increaseBtn.addEventListener('click', () => {
+            let value = parseInt(quantityInput.value);
+            if (value < maxQuantity) {
+                quantityInput.value = value + 1;
+            }
+        });
+
+        // Initialize with the first image
+        updateMainImage(0);
+    }, 100); // Small delay to ensure DOM is fully rendered
+});
+</script>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends 'myapp/base.html' %}
+
+{% block title %}創建管理員帳號{% endblock %}
+
+{% block content %}
+<section class="form-section">
+    <h3>創建管理員帳號</h3>
+    {% if messages %}
+        {% for message in messages %}
+            <p class="message {% if message.tags %}{{ message.tags }}{% endif %}">{{ message }}</p>
+        {% endfor %}
+    {% endif %}
+    <form method="POST" class="form">
+        {% csrf_token %}
+        <label for="id_username">用戶名</label>
+        <input type="text" id="id_username" name="username" required placeholder="輸入用戶名">
+        
+        <label for="id_email">電子郵件</label>
+        <input type="email" id="id_email" name="email" required placeholder="輸入電子郵件">
+        
+        <label for="id_password1">密碼</label>
+        <input type="password" id="id_password1" name="password1" required placeholder="輸入密碼">
+        
+        <label for="id_password2">確認密碼</label>
+        <input type="password" id="id_password2" name="password2" required placeholder="再次輸入密碼">
+        
+        <button type="submit">創建管理員帳號</button>
+    </form>
+    <div class="form-links">
+        <a href="{% url 'home' %}" class="form-link">返回管理頁面</a>
+    </div>
+</section>
+{% endblock %} 

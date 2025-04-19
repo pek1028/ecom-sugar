@@ -1,0 +1,37 @@
+<!-- templates/myapp/upload.html -->
+{% extends 'myapp/base.html' %}
+{% load static %}
+
+{% block title %}Sugar{% endblock %}
+
+{% block content %}
+    <section class="form-section">
+        <h3>上傳產品</h3>
+        <form method="POST" enctype="multipart/form-data" class="form">
+            {% csrf_token %}
+            <label for="id">產品ID</label>
+            <input type="text" id="id" name="id" required placeholder="S001">
+            <label for="name">名稱</label>
+            <input type="text" id="name" name="name" required placeholder="花卉襯衫">
+            <label for="price">價格 (新台幣)</label>
+            <input type="number" id="price" name="price" required placeholder="900" min="0" step="1">
+            <label for="quantity">數量</label>
+            <input type="number" id="quantity" name="quantity" required placeholder="10" min="0" step="1">
+            <label for="category">類別</label>
+            <select id="category" name="category">
+                <option value="">無類別</option>
+                {% for category in categories %}
+                    <option value="{{ category.id }}">{{ category.name }}</option>
+                {% endfor %}
+            </select>
+            <label for="description">描述</label>
+            <textarea id="description" name="description" placeholder="特別百搭的一件衣服"></textarea>
+            <label for="images">圖片 (可選多張)</label>
+            <input type="file" id="images" name="images" accept="image/*" multiple>
+            <button type="submit">上傳</button>
+        </form>
+        {% if message %}
+            <p class="message">{{ message }}</p>
+        {% endif %}
+    </section>
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends 'myapp/base.html' %}
+{% load static %}
+
+{% block title %}銀行轉帳付款 - Sugar{% endblock %}
+
+{% block content %}
+<div class="payment-container">
+    <div class="payment-card">
+        <h2>銀行轉帳付款資訊</h2>
+        
+        <div class="order-summary">
+            <h3>訂單摘要</h3>
+            <div class="order-details">
+                <p><span>訂單編號:</span> {{ order.id }}</p>
+                <p><span>總金額:</span> ${{ order.total_price }}</p>
+            </div>
+        </div>
+
+        <div class="bank-details">
+            <h3>銀行帳戶資訊</h3>
+            <div class="account-info">
+                <p><span>銀行名稱:</span> 台灣銀行</p>
+                <p><span>分行名稱:</span> 台北分行</p>
+                <p><span>帳戶名稱:</span> Sugar 有限公司</p>
+                <p><span>帳號:</span> 1234-5678-9012</p>
+            </div>
+        </div>
+
+        <div class="payment-instructions">
+            <h3>付款步驟</h3>
+            <ol>
+                <li>請使用網路銀行或 ATM 進行轉帳</li>
+                <li>轉帳金額請輸入訂單總金額</li>
+                <li>轉帳完成後，請保留轉帳收據或交易明細</li>
+                <li>系統將於確認款項後更新訂單狀態</li>
+            </ol>
+        </div>
+
+        <div class="payment-status">
+            <p>付款完成後，請點擊下方按鈕更新訂單狀態</p>
+            <p>請於 24 小時內完成轉帳，逾期訂單將自動取消</p>
+        </div>
+
+        <div class="action-buttons">
+            <a href="{% url 'order_confirmation' order.id %}" class="btn-check-status">檢查付款狀態</a>
+            <a href="{% url 'home' %}" class="btn-cancel">取消付款</a>
+        </div>
+    </div>
+</div>
+{% endblock %} 

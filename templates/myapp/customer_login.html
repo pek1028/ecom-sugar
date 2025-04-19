@@ -1,0 +1,25 @@
+{% extends 'myapp/base.html' %}
+
+{% block title %}登入{% endblock %}
+
+{% block content %}
+<section class="form-section">
+    <h3>登入</h3>
+    {% if error %}
+        <p class="message">{{ error }}</p>
+    {% endif %}
+    <form method="POST" class="form">
+        {% csrf_token %}
+        <label for="username">用戶名</label>
+        <input type="text" id="username" name="username" required placeholder="輸入用戶名">
+
+        <label for="password">密碼</label>
+        <input type="password" id="password" name="password" required placeholder="輸入密碼">
+        <button type="submit">登入</button>
+    </form>
+    <div class="form-links">
+        <a href="{% url 'customer_register' %}" class="form-link">註冊新帳號</a>
+        <a href="{% url 'password_reset' %}" class="form-link">忘記密碼？</a>
+    </div>
+</section>
+{% endblock %}

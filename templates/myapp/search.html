@@ -1,0 +1,96 @@
+{% extends 'myapp/base.html' %}
+{% load static %}
+
+{% block title %}Sugar{% endblock %}
+
+{% block content %}
+    <section class="form-section">
+        <h3>按產品ID搜尋</h3>
+        <form method="POST" class="form">
+            {% csrf_token %}
+            <input type="hidden" name="search" value="1">
+            <label for="product_id">產品ID</label>
+            <input type="text" id="product_id" name="product_id" required placeholder="S001">
+            <button type="submit">搜尋</button>
+        </form>
+
+        {% if product %}
+            <div class="product-details">
+                <h4>{{ product.name }}</h4>
+                <p>價格：NT${{ product.price }}</p>
+                <p>數量：{{ product.quantity }}</p>
+                <p>類別：{{ product.category.name|default:"無" }}</p>
+                <p>{{ product.description }}</p>
+                {% for image in product.images.all %}
+                    <img src="{{ image.image.url }}" alt="{{ product.name }}" class="product-image">
+                {% endfor %}
+                <div class="product-actions">
+                    <a href="{% url 'edit_product' product.id %}" class="btn btn-edit">編輯</a>
+                    <a href="{% url 'delete_product' product.id %}" class="btn btn-delete">刪除</a>
+                </div>
+            </div>
+        {% else %}
+            {% if message %}
+                <p class="message">{{ message }}</p>
+            {% endif %}
+        {% endif %}
+    </section>
+
+    <!-- Edit Form -->
+    {% if edit_mode %}
+    <section class="form-section">
+        <h3>編輯產品</h3>
+        <form method="POST" enctype="multipart/form-data" class="form">
+            {% csrf_token %}
+            <label for="id">產品ID (不可更改)</label>
+            <input type="text" id="id" name="id" value="{{ product.id }}" disabled>
+            <label for="name">名稱</label>
+            <input type="text" id="name" name="name" value="{{ product.name }}" required>
+            <label for="price">價格 (新台幣)</label>
+            <input type="number" id="price" name="price" value="{{ product.price }}" required min="0" step="1">
+            <label for="quantity">數量</label>
+            <input type="number" id="quantity" name="quantity" value="{{ product.quantity }}" required min="0" step="1">
+            <label for="category">類別</label>
+            <select id="category" name="category">
+                <option value="">無類別</option>
+                {% for category in categories %}
+                    <option value="{{ category.id }}" {% if category.id == product.category.id %}selected{% endif %}>{{ category.name }}</option>
+                {% endfor %}
+            </select>
+            <label for="description">描述</label>
+            <textarea id="description" name="description">{{ product.description }}</textarea>
+            <label>現有圖片 (勾選以刪除)</label>
+            <div class="image-list">
+                {% for image in product.images.all %}
+                    <div class="image-item">
+                        <input type="checkbox" name="delete_images" value="{{ image.id }}">
+                        <img src="{{ image.image.url }}" alt="{{ product.name }}" class="product-image">
+                    </div>
+                {% endfor %}
+            </div>
+            <label for="images">新增圖片 (可選多張)</label>
+            <input type="file" id="images" name="images" accept="image/*" multiple>
+            <button type="submit">保存更改</button>
+        </form>
+        {% if message %}
+            <p class="message">{{ message }}</p>
+        {% endif %}
+        <a href="{% url 'search_product' %}" class="btn btn-back">返回</a>
+    </section>
+    {% endif %}
+
+    <!-- Delete Confirmation -->
+    {% if delete_mode %}
+    <section class="form-section">
+        <h3>刪除產品</h3>
+        <p>確定要刪除 "{{ product.name }}" 嗎？此操作無法撤銷。</p>
+        <form method="POST" class="form">
+            {% csrf_token %}
+            <div class="button-group">
+                <button type="submit" class="btn btn-delete">確認刪除</button>
+                <a href="{% url 'search_product' %}" class="btn btn-back">取消</a>
+            </div>
+        </form>
+    </section>
+    {% endif %}
+{% endblock %}

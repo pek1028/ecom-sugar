@@ -1,0 +1,75 @@
+{% extends 'myapp/base.html' %}
+{% load static %}
+
+{% block title %}結帳 - Sugar{% endblock %}
+
+{% block content %}
+<div class="checkout-container">
+    <h2>結帳</h2>
+    
+    <div class="cart-summary">
+        <h3>購物車內容</h3>
+        {% for item in cart_items %}
+        <div class="cart-item">
+            <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
+            <div class="item-details">
+                <h4>{{ item.product.name }}</h4>
+                <p>數量: {{ item.quantity }}</p>
+                <p>價格: ${{ item.subtotal }}</p>
+            </div>
+        </div>
+        {% endfor %}
+        <div class="total-price">
+            <h3>總金額: ${{ total_price }}</h3>
+        </div>
+    </div>
+
+    <div class="shipping-form">
+        <h3>送貨資訊</h3>
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="{{ form.name.id_for_label }}">姓名</label>
+                {{ form.name }}
+                {% if form.name.errors %}
+                <div class="error">{{ form.name.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.phone.id_for_label }}">電話</label>
+                {{ form.phone }}
+                {% if form.phone.errors %}
+                <div class="error">{{ form.phone.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.address.id_for_label }}">地址</label>
+                {{ form.address }}
+                {% if form.address.errors %}
+                <div class="error">{{ form.address.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.delivery_method.id_for_label }}">送貨方式</label>
+                {{ form.delivery_method }}
+                {% if form.delivery_method.errors %}
+                <div class="error">{{ form.delivery_method.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.payment_method.id_for_label }}">付款方式</label>
+                {{ form.payment_method }}
+                {% if form.payment_method.errors %}
+                <div class="error">{{ form.payment_method.errors }}</div>
+                {% endif %}
+            </div>
+
+            <button type="submit" class="checkout-button">確認結帳</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

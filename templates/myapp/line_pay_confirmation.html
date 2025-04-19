@@ -1,0 +1,49 @@
+{% extends 'myapp/base.html' %}
+{% load static %}
+
+{% block title %}Line Pay 付款 - Sugar{% endblock %}
+
+{% block content %}
+<div class="payment-container">
+    <div class="payment-card">
+        <h2>Line Pay 付款資訊</h2>
+        
+        <div class="order-summary">
+            <h3>訂單摘要</h3>
+            <div class="order-details">
+                <p><span>訂單編號:</span> {{ order.id }}</p>
+                <p><span>總金額:</span> ${{ order.total_price }}</p>
+            </div>
+        </div>
+
+        <div class="qr-section">
+            <h3>掃描 QR Code 付款</h3>
+            <div class="qr-code">
+                <!-- Replace with actual QR code -->
+                <img src="{% static 'images/line-pay-qr.png' %}" alt="Line Pay QR Code">
+            </div>
+            <p class="qr-instruction">請使用 Line App 掃描上方 QR Code 進行付款</p>
+        </div>
+
+        <div class="payment-instructions">
+            <h3>付款步驟</h3>
+            <ol>
+                <li>開啟 Line App</li>
+                <li>點擊掃描 QR Code</li>
+                <li>確認付款金額</li>
+                <li>輸入 Line Pay 密碼完成付款</li>
+            </ol>
+        </div>
+
+        <div class="payment-status">
+            <p>付款完成後，系統會自動更新訂單狀態</p>
+            <p>請勿關閉此頁面直到付款完成</p>
+        </div>
+
+        <div class="action-buttons">
+            <a href="{% url 'order_confirmation' order.id %}" class="btn-check-status">檢查付款狀態</a>
+            <a href="{% url 'home' %}" class="btn-cancel">取消付款</a>
+        </div>
+    </div>
+</div>
+{% endblock %} 

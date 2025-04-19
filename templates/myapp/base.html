@@ -1,0 +1,55 @@
+<!-- templates/myapp/base.html -->
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Sugar{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <a href="{% url 'home' %}">
+                <img src="{% static 'images/logo.png' %}" alt="Logo" class="logo-image">
+            </a>
+            <h1 class="brand-name">Sugar</h1>
+        </div>
+        <ul class="nav-links">
+            <li><a href="{% url 'home' %}">首頁</a></li>
+            {% if user.is_authenticated %}
+                {% if user.is_staff %}
+                    <li><a href="{% url 'search_product' %}">搜尋</a></li>
+                    <li><a href="{% url 'upload_product' %}">上傳</a></li>
+                    <li><a href="{% url 'admin_register' %}">創建管理員</a></li>
+                    <li><a href="{% url 'logout' %}">登出</a></li>
+                {% else %}
+                    <li><a href="{% url 'profile' %}">個人資料</a></li>
+                    <li><a href="{% url 'customer_logout' %}">登出</a></li>
+                {% endif %}
+            {% else %}
+                <li><a href="{% url 'customer_login' %}">登入</a></li>
+                <li><a href="{% url 'customer_register' %}">註冊</a></li>
+            {% endif %}
+            <li><a href="{% url 'cart_view' %}" class="cart-link" data-count="{{ cart_item_count }}">購物車</a></li>
+            <li><a href="#">其他功能 (待定)</a></li>
+        </ul>
+    </nav>
+
+    <main class="container">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <footer class="footer">
+        <p>© 2025 Sugar</p>
+        <div class="social-icons">
+            <a href="#" target="_blank"><img src="{% static 'images/instagram.png' %}" alt="Instagram"></a>
+            <a href="#" target="_blank"><img src="{% static 'images/tiktok.png' %}" alt="TikTok"></a>
+            <a href="#" target="_blank"><img src="{% static 'images/line.png' %}" alt="Line"></a>
+        </div>
+    </footer>
+</body>
+</html>

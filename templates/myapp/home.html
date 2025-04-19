@@ -1,0 +1,120 @@
+{% extends 'myapp/base.html' %}
+{% load static %}
+
+{% block title %}首頁{% endblock %}
+
+{% block content %}
+<div class="home-container">
+    <!-- Left Side: Filter Panel -->
+    <aside class="filter-panel">
+        <h3>篩選產品</h3>
+        <form method="GET" class="filter-form">
+            <!-- Search Bar -->
+            <div class="filter-section">
+                <h4>搜尋產品</h4>
+                <input type="text" name="search" placeholder="搜尋" value="{{ request.GET.search|default:'' }}" class="search-input">
+            </div>
+            <!-- Category Filter -->
+            <div class="filter-section">
+                <h4>類別</h4>
+                <div class="filter-options">
+                    {% for category in categories %}
+                        <label class="filter-option">
+                            <input type="checkbox" name="category" value="{{ category.id }}"
+                                {% if category.id|stringformat:"s" in request.GET.category %}checked{% endif %}>
+                            {{ category.name }} ({{ category.product_set.count }})
+                        </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Price Range Filter -->
+            <div class="filter-section">
+                <h4>價格範圍 (新台幣)</h4>
+                <div class="filter-options">
+                    <label class="filter-option">
+                        <input type="checkbox" name="price_range" value="0-500"
+                            {% if "0-500" in request.GET.price_range %}checked{% endif %}>
+                        NT$0 - NT$500
+                    </label>
+                    <label class="filter-option">
+                        <input type="checkbox" name="price_range" value="500-1000"
+                            {% if "500-1000" in request.GET.price_range %}checked{% endif %}>
+                        NT$500 - NT$1000
+                    </label>
+                    <label class="filter-option">
+                        <input type="checkbox" name="price_range" value="1000-2000"
+                            {% if "1000-2000" in request.GET.price_range %}checked{% endif %}>
+                        NT$1000 - NT$2000
+                    </label>
+                    <label class="filter-option">
+                        <input type="checkbox" name="price_range" value="2000+"
+                            {% if "2000+" in request.GET.price_range %}checked{% endif %}>
+                        NT$2000 以上
+                    </label>
+                </div>
+            </div>
+
+            <!-- Size Filter -->
+            <div class="filter-section">
+                <h4>尺寸</h4>
+                <div class="filter-options">
+                    {% for size in sizes %}
+                        <label class="filter-option">
+                            <input type="checkbox" name="size" value="{{ size }}"
+                                {% if size in request.GET.size %}checked{% endif %}>
+                            {{ size }}
+                        </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Color Filter -->
+            <div class="filter-section">
+                <h4>顏色</h4>
+                <div class="filter-options">
+                    {% for color in colors %}
+                        <label class="filter-option">
+                            <input type="checkbox" name="color" value="{{ color }}"
+                                {% if color in request.GET.color %}checked{% endif %}>
+                            {{ color }}
+                        </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-filter">應用篩選</button>
+        </form>
+    </aside>
+
+    <!-- Right Side: Product List -->
+    <main class="product-list-section">
+        <h2>產品列表 ({{ products.count }} 件商品)</h2>
+        {% if products %}
+            <div class="product-list">
+                {% for product in products %}
+                    <div class="product-card">
+                        <a href="{% url 'product_detail' product.id %}" class="product-card-link">
+                            <div class="product-image-wrapper">
+                                {% if product.images.first %}
+                                    <img src="{{ product.images.first.image.url }}" alt="{{ product.name }}" class="product-image">
+                                {% else %}
+                                    <img src="{% static 'images/placeholder.png' %}" alt="無圖片" class="product-image">
+                                {% endif %}
+                            </div>
+                            <h4>{{ product.name }}</h4>
+                            <p class="price">NT${{ product.price }}</p>
+                            <div class="product-card-footer">
+                                <p>尺寸: {{ product.size|default:"未指定" }}</p>
+                                <p>顏色: {{ product.color|default:"未指定" }}</p>
+                            </div>
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="message">目前沒有產品可顯示。請稍後再試或聯繫我們！</p>
+        {% endif %}
+    </main>
+</div>
+{% endblock %}
